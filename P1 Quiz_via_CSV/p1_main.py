@@ -119,7 +119,7 @@ class abc():
 
         Button(self.crf,text = 'Create Account',bd = 3 ,font = ('',15),padx=5,pady=5,command=self.new_user).grid()
         Button(self.crf,text = 'Go to Login',bd = 3 ,font = ('',15),padx=5,pady=5,command=self.log).grid(row=4,column=1)
-        
+
 # Countdowm Function for Timer...
 def countdown(t,Q): 
     global stop_timer
@@ -245,3 +245,75 @@ def main_quiz(quiz_name):
             quiz_window.destroy()
         except:
             end_quiz()
+
+# Function for the Save & Next Button Working...
+def next_ques(list_ques, topframe, mid2frame, selected_option):
+    global ques_no
+    global total_marks
+    global User_Roll
+    global marked
+    global unatt
+    
+    for widget in topframe.winfo_children():
+       widget.destroy()
+    
+    if ques_no > 0 and len(list_ques) >= ques_no:
+        marked[ques_no - 1] = int(selected_option.get())
+    
+    if len(list_ques) == ques_no:
+        ques_no -= 1
+    
+    selected_option.set(marked[ques_no])
+    Label(topframe, text = str(ques_no+1) + ". " + list_ques[ques_no]["question"] + "\n").pack(anchor = NW)
+    R1 = Radiobutton(topframe, text=list_ques[ques_no]["option1"], variable=selected_option, value=1)
+    R1.pack()
+    R2 = Radiobutton(topframe, text=list_ques[ques_no]["option2"], variable=selected_option, value=2)
+    R2.pack()
+    R3 = Radiobutton(topframe, text=list_ques[ques_no]["option3"], variable=selected_option, value=3)
+    R3.pack()
+    R4 = Radiobutton(topframe, text=list_ques[ques_no]["option4"], variable=selected_option, value=4)
+    R4.pack()
+    
+    Label(mid2frame, text = "Correct Ans: ").grid(row = 0, sticky = W)
+    Label(mid2frame, text = list_ques[ques_no]["marks_correct_ans"]).grid(row = 0, column = 1)
+    Label(mid2frame, text = "Wrong Ans: ").grid(row = 1, sticky = W)
+    Label(mid2frame, text = list_ques[ques_no]["marks_wrong_ans"]).grid(row = 1, column = 1)
+    Label(mid2frame, text = "Is Compulsory: ").grid(row = 2, sticky = W)
+    Label(mid2frame, text = list_ques[ques_no]["compulsory"]).grid(row = 2, column = 1)
+    Label(mid2frame, text = "").grid(row = 3)
+    
+    unatt = 0
+    for i in marked:
+        if not i:
+            unatt += 1
+    ques_no += 1
+
+# Function for Goto Option (Called after clicking "OK" button)...
+def goto_ques(list_ques, topframe, mid2frame, choice, selected_option):
+    global ques_no
+    global marked
+    ques_no = choice - 1
+    selected_option.set(marked[ques_no])
+    
+    for widget in topframe.winfo_children():
+       widget.destroy()
+    
+    Label(topframe, text = str(ques_no+1) + ". " + list_ques[ques_no]["question"] + "\n").pack(anchor = NW)
+    R1 = Radiobutton(topframe, text=list_ques[ques_no]["option1"], variable=selected_option, value=1)
+    R1.pack()
+    R2 = Radiobutton(topframe, text=list_ques[ques_no]["option2"], variable=selected_option, value=2)
+    R2.pack()
+    R3 = Radiobutton(topframe, text=list_ques[ques_no]["option3"], variable=selected_option, value=3)
+    R3.pack()
+    R4 = Radiobutton(topframe, text=list_ques[ques_no]["option4"], variable=selected_option, value=4)
+    R4.pack()
+    
+    Label(mid2frame, text = "Correct Ans: ").grid(row = 0, sticky = W)
+    Label(mid2frame, text = list_ques[ques_no]["marks_correct_ans"]).grid(row = 0, column = 1)
+    Label(mid2frame, text = "Wrong Ans: ").grid(row = 1, sticky = W)
+    Label(mid2frame, text = list_ques[ques_no]["marks_wrong_ans"]).grid(row = 1, column = 1)
+    Label(mid2frame, text = "Is Compulsory: ").grid(row = 2, sticky = W)
+    Label(mid2frame, text = list_ques[ques_no]["compulsory"]).grid(row = 2, column = 1)
+    Label(mid2frame, text = "").grid(row = 3)
+    
+    ques_no += 1
