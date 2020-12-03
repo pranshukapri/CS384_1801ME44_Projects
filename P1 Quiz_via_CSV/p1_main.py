@@ -137,3 +137,111 @@ def countdown(t,Q):
 # Function for initial Login/Signup...
 def login_window():
     win=abc()
+    
+# Funtion for the quiz Selection Window...
+def quiz_select(master):
+    global quiz_no
+    master.destroy()
+    select = Tk()
+    Label(select, text = "Choose the quiz you want to start: \n").pack(pady = 5, padx =10)
+    
+    quiz_name = StringVar()
+    quiz_name.set(None)
+    quizes = os.listdir("./quiz_wise_questions")
+    i = 0
+    for num in quizes:
+        R = Radiobutton(select, text = num[:-4], variable=quiz_name, value = num)
+        R.pack()
+        i += 1
+    Button(select, text = "OK", command = lambda : [select.destroy(), main_quiz(quiz_name.get())]).pack(pady = 20)
+    select.mainloop()
+
+# Main Function for the Realtime Quiz...   
+def main_quiz(quiz_name):
+    global ques_no
+    global User_Name
+    global User_Roll
+    global quiz_no
+    global marked
+    global unatt
+    quiz_no = quiz_name[:-4]
+    
+    quiz_window = Tk()
+    #quiz_window.geometry("500x500")
+
+    topframe = Frame(quiz_window)
+    topframe.pack(side = TOP)
+    midframe = Frame(quiz_window)
+    midframe.pack(side = TOP)
+    mid2frame = Frame(quiz_window)
+    mid2frame.pack(side = TOP)
+    bottomframe = Frame(quiz_window)
+    bottomframe.pack(side = BOTTOM)
+
+    #Binding Parameters
+    quiz_window.bind('<Control-Alt-e>',database_to_csv_eventpress)
+    quiz_window.bind('<Control-Alt-f>',end_quiz_eventpress)
+    quiz_window.bind('<Control-Alt-u>',unattempted_ques_eventpress)
+
+    with open("./quiz_wise_questions/" + quiz_name, 'r') as questions:
+        read = csv.DictReader(questions, delimiter = ',')
+        header = read.fieldnames
+        list_ques = list(read)
+        ques_no = 0
+        q_no = []
+        for x in range(len(list_ques)):
+            marked.append(0)
+            q_no.append(x+1)
+        
+        Q = Queue()
+        max_time = re.search(r'=(\d+)', header[-1]).group(1)
+        max_time = int(max_time) * 60
+        t2 = threading.Thread(target=countdown, args=(max_time, Q))
+        t2.start()
+        
+        selected_option = IntVar()
+        selected_option.set(0)
+        next_ques(list_ques, topframe, mid2frame, selected_option)
+        Button(midframe, text = "Save & Next", command = lambda : next_ques(list_ques, topframe, mid2frame, selected_option)).pack(pady = 10, padx = 5, side = LEFT)
+        Button(midframe, text = "Submit", command = lambda : end_quiz()).pack(pady = 10, padx = 5)
+        
+        var = IntVar()
+        var.set(max_time)
+        choice = IntVar()
+        choice.set(0)
+        unattempted = IntVar()
+        Label(bottomframe, text = "Time Left: ").grid(row = 0, sticky = W)
+        Label(bottomframe, textvariable = var).grid(row = 0, column = 1)
+        Label(bottomframe, text = "Roll: ").grid(row = 1, sticky = W)
+        Label(bottomframe, text = User_Roll).grid(row = 1, column = 1)
+        Label(bottomframe, text = "Name: ").grid(row = 2, sticky = W)
+        Label(bottomframe, text = User_Name).grid(row = 2, column = 1)
+        Label(bottomframe, text = "Unattempted Questions: ").grid(row = 3, sticky = W)
+        Label(bottomframe, textvariable = unattempted).grid(row = 3, column = 1)
+        Label(bottomframe, text = "Goto Question: ").grid(row = 4, sticky = W)
+        ttk.Combobox(bottomframe, values = q_no, textvariable=choice, width = 5).grid(row = 4, column = 1)
+        Button(bottomframe, text = "Ok", command = lambda : goto_ques(list_ques, topframe, mid2frame, choice.get(), selected_option)).grid(row = 4, column = 2)
+        
+        keys_temp = list(list_ques[0].keys())
+        del(keys_temp[-1])
+        keys_temp.append("marked_choice")
+        keys_temp.append("Total")
+        keys_temp.append("Legend")
+        with open("./individual_responses/" + quiz_no + "_" + User_Roll + ".csv", 'w', newline='') as indi:
+            writer = csv.DictWriter(indi, fieldnames = keys_temp)
+            writer.writeheader()
+        
+        while 1:
+            var.set(Q.get())
+            unattempted.set(unatt)
+            try:
+                quiz_window.update()
+            except:
+                break
+            if stop_timer:
+                break
+        
+        try:
+            quiz_window.destroy()
+        except:
+            end_quiz()
