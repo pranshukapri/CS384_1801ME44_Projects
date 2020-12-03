@@ -317,3 +317,111 @@ def goto_ques(list_ques, topframe, mid2frame, choice, selected_option):
     Label(mid2frame, text = "").grid(row = 3)
     
     ques_no += 1
+
+# Function for Evaluating the final parameters and putting into the csv file...
+def evalute():
+    global marked
+    global total_marks
+    global quiz_no
+    global User_Roll
+    
+    i = 0
+    total_quiz_marks = 0
+    dict_temp = {}
+    list_ques = []
+    
+    with open("./quiz_wise_questions/" + quiz_no + ".csv", 'r') as questions:
+        read = csv.DictReader(questions, delimiter = ',')
+        list_ques = list(read)
+    for row in list_ques:
+        total = 0
+        dict_temp = row
+        dict_temp.popitem()
+        dict_temp["marked_choice"] = marked[i]
+        dict_temp["Total"] = 0
+        dict_temp["Legend"] = "Unanswered"
+    
+        with open("./individual_responses/" + quiz_no + "_" + User_Roll + ".csv", 'a', newline='') as indi:
+            writer = csv.DictWriter(indi, fieldnames = dict_temp.keys())
+        
+            if row["compulsory"] == 'y':
+                if int(marked[i]) == int(row["correct_option"]):
+                    total = int(row["marks_correct_ans"])
+                    dict_temp["Legend"] = "Correct Choice"
+                else:
+                    total = int(row["marks_wrong_ans"])
+                    if int(marked[i]):
+                        dict_temp["Legend"] = "Wrong Choice"
+                    else:
+                        dict_temp["Legend"] = "Wrong Choice (Unattempted)"
+            else:
+                if int(marked[i]) == int(row["correct_option"]):
+                    total = int(row["marks_correct_ans"])
+                    dict_temp["Legend"] = "Correct Choice"
+                elif int(marked[i]):
+                    total = int(row["marks_wrong_ans"])
+                    dict_temp["Legend"] = "Wrong Choice"
+            dict_temp["Total"] = total
+            total_marks = total_marks + total
+            total_quiz_marks = total_quiz_marks + int(row["marks_correct_ans"])
+            writer.writerow(dict_temp)
+        i += 1
+    
+    with open("./individual_responses/" + quiz_no + "_" + User_Roll + ".csv", 'a', newline='') as indi:
+        writer = csv.DictWriter(indi, fieldnames = dict_temp.keys())
+        for key in dict_temp:
+            dict_temp[key] = ""
+        dict_temp["Total"] = total_marks
+        dict_temp["Legend"] = "Marks Obtained"
+        writer.writerow(dict_temp)
+        dict_temp["Total"] = total_quiz_marks
+        dict_temp["Legend"] = "Total Quiz Marks"
+        writer.writerow(dict_temp)
+    
+# Final Function for ending the quiz and the Final Result Window...
+def end_quiz():
+    global stop_timer
+    global total_marks
+    global quiz_no
+    global User_Roll
+    m=ms.askyesno(title='Submit',message='Are you Sure?')
+    if m:
+        stop_timer = True
+    
+        evalute()
+        subm_window = Tk()
+    
+        total_quiz_ques = 0
+        ques_att = 0
+        corr = 0
+        wrong = 0
+    
+        with open("./individual_responses/" + quiz_no + "_" + User_Roll + ".csv", 'r') as indi:
+            reader = csv.DictReader(indi, delimiter=',')
+        
+            for row in reader:
+                total_quiz_ques += 1
+                if row["Legend"] == "Correct Choice":
+                    corr += 1
+                    ques_att += 1
+                if row["Legend"] == "Wrong Choice":
+                    wrong += 1
+                    ques_att += 1
+            total_quiz_ques = total_quiz_ques - 2
+            
+        database_marks_sub()
+        
+    else:
+        return
+    
+    Label(subm_window, text = "Your Quiz has been Sucessfully Submitted!\n").grid(row = 0)
+    Label(subm_window, text = "Total Quiz Questions: ").grid(row = 1, sticky = W)
+    Label(subm_window, text = total_quiz_ques).grid(row = 1, column = 1)
+    Label(subm_window, text = "Total Quiz Questions Attempted: ").grid(row = 2, sticky = W)
+    Label(subm_window, text = ques_att).grid(row = 2, column = 1)
+    Label(subm_window, text = "Total Correct Questions: ").grid(row = 3, sticky = W)
+    Label(subm_window, text = corr).grid(row = 3, column = 1)
+    Label(subm_window, text = "Total Wrong Questions: ").grid(row = 4, sticky = W)
+    Label(subm_window, text = wrong).grid(row = 4, column = 1)
+    Label(subm_window, text = "Total Marks Obtained: ").grid(row = 5, sticky = W)
+    Label(subm_window, text = total_marks).grid(row = 5, column = 1)
