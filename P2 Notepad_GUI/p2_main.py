@@ -34,6 +34,28 @@ def save():
 	print('File saved successfully')
 # --------------------------------------------	
 # save file shortcut
+def save1(event):
+	s=filedialog.asksaveasfilename()
+	f1=open(s,'w')
+	f1.write(t1.get('1.0','end-1c'))
+	f1.close()
+	print('File saved successfully')
+# ------------------------------------------------			
+# new file
+def newFile():
+	t1.delete('1.0',END)
+# -------------------------------------------------	
+# new file shortcut	
+def newFile1(event):
+	t1.delete('1.0',END)
+# -------------------------------------------------		
+# exit confirmation
+def quit():
+	m=messagebox.askyesno(title='Exit',message='Are you Sure?')
+	if m:
+		root.destroy()
+# ---------------------------------------------------		
+# theme color color
 
 # _______________________________________________________________________________________________________________________________
 # -----------------------Text Widget--------------------------------------
