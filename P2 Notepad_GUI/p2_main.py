@@ -90,7 +90,29 @@ def fontWin():
 # key pressed event 
 def press(event):
 	undoList.append(t1.get('1.0','end-1c'))
-
+# undo button
+def undo():
+	t1.delete('1.0',END)
+	u=undoList.pop()
+	redoList.append(u)
+	t1.insert(END,u)
+	print(redoList)
+# ---------------------------------------------------------------------	
+# redo button
+def redo():
+	t1.delete('1.0',END)
+	r=redoList.pop()
+	undoList.append(r)
+	t1.insert(END,r)
+	print(redoList)
+# undo shortcut
+def undo1(event):
+	t1.delete('1.0',END)
+	u=undoList.pop()
+	redoList.append(u)
+	t1.insert(END,u)
+	print(redoList)
+# ----------------------------------------------------------------------------
 
 # _______________________________________________________________________________________________________________________________
 # -----------------------Text Widget--------------------------------------
