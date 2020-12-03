@@ -129,6 +129,47 @@ def modification_date(filename):
     t = os.path.getmtime(filename)
     return datetime.datetime.fromtimestamp(t)
 
+def creation_date(path_to_file):
+
+    if platform.system() == 'Windows':
+        return os.path.getctime(path_to_file)
+    else:
+        stat = os.stat(path_to_file)
+        try:
+            return stat.st_birthtime
+        except AttributeError:
+            # We're probably on Linux. No easy way to get creation dates here,
+            # so we'll settle for when its content was last modified.
+            return stat.st_mtime
+
+
+
+def far():
+	t2=Toplevel(root)
+	t2.title('Find & Replace')
+	t2.geometry('210x100+100+100')
+	
+	v1=StringVar()
+	v2=StringVar()
+	v3=StringVar()
+
+	def find():
+		reg1=re.compile(v1.get())
+		s1=reg1.search(t1.get('1.0','end-1c'))
+		count=len(s1.group())
+		v3.set(str(count)+' matches')
+
+	def rep():
+		pass	
+
+	l1=Label(t2,text='Find:').grid(row=0,column=0,sticky=W)
+	l2=Label(t2,text='Replace:').grid(row=1,column=0)
+	l3=Label(t2,textvariable=v3).grid(row=3,column=0)
+	
+	e1=Entry(t2,textvariable=v1).grid(row=0,column=1)
+	e2=Entry(t2,textvariable=v2).grid(row=1,column=1)
+	b1=Button(t2,text='Find',command=find).grid(row=2,column=0,sticky=E)
+	b2=Button(t2,text='Replace',command=rep).grid(row=2,column=1)
 
 # _______________________________________________________________________________________________________________________________
 # -----------------------Text Widget--------------------------------------
