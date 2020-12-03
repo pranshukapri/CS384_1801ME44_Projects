@@ -57,6 +57,41 @@ def quit():
 # ---------------------------------------------------		
 # theme color color
 
+def col():
+	c=colorchooser.askcolor()
+	t1['background']=c[1]
+# ----------------------------------------------------
+#font menu
+def fontWin():
+	t=Toplevel(root)
+	t.title('Font')
+	def o(*args):
+		reg=re.compile(r'\d\d')
+		t1['font']=reg.sub(varSize.get(),t1['font'])
+	# foreground color
+	def colfg():
+		c1=colorchooser.askcolor()
+		t1['fg']=c1[1]
+	# --------------------------------------	
+	varSize=StringVar()
+	varSize.set('1')
+	varSize.trace("w", o)
+	varFont=StringVar()
+	varFont.set('abc')
+	size=[]
+
+	for i in range(18):
+		size.append(str(i+1))
+	sizeO=OptionMenu(t,varSize,*size).grid(row=0,column=0)
+	fontList=['abc','bcd','efg']
+	fontO=OptionMenu(t,varFont,*fontList).grid(row=0,column=1)
+	b=Button(t,text='Color',fg='black',command=colfg).grid(row=0,column=2)
+# ------------------------------------------------------------	
+# key pressed event 
+def press(event):
+	undoList.append(t1.get('1.0','end-1c'))
+
+
 # _______________________________________________________________________________________________________________________________
 # -----------------------Text Widget--------------------------------------
 t1=Text(root,font='Consolas 25')
