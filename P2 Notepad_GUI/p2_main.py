@@ -56,7 +56,6 @@ def quit():
 		root.destroy()
 # ---------------------------------------------------		
 # theme color color
-
 def col():
 	c=colorchooser.askcolor()
 	t1['background']=c[1]
@@ -113,6 +112,23 @@ def undo1(event):
 	t1.insert(END,u)
 	print(redoList)
 # ----------------------------------------------------------------------------
+def Stats():
+	modified_date=''
+	creation_filedate=''
+	countchar=len(t1.get('1.0','end-1c')) - t1.get('1.0','end-1c').count(" ")
+	countwords=t1.get('1.0','end-1c').count(" ")+1
+	if(ovr_filename==''):
+		modified_date="File Hasnt been Saved"
+		creation_filedate="File hasn't been Saved"
+	else:
+		modified_date=modification_date(ovr_filename)
+		creation_filedate=datetime.datetime.fromtimestamp(creation_date(ovr_filename))
+	m=messagebox.showinfo("Stats","No of Char = "+str(countchar)+'\n'+"No of Words = "+str(countwords)+'\n'+"Modified Date: "+str(modified_date)+'\n'+"Creation Date: "+str(creation_filedate))
+
+def modification_date(filename):
+    t = os.path.getmtime(filename)
+    return datetime.datetime.fromtimestamp(t)
+
 
 # _______________________________________________________________________________________________________________________________
 # -----------------------Text Widget--------------------------------------
