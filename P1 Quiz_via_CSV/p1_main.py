@@ -4,6 +4,7 @@ import os
 import csv
 import re
 import sqlite3
+import hashlib
 from tkinter import *
 from tkinter import ttk
 from queue import Queue
@@ -44,7 +45,7 @@ class abc():
 
         #Find project1_registration If there is any take proper action
         find_user = ('SELECT * FROM project1_registration WHERE Roll_No = ? and password = ?')
-        m=c.execute(find_user,[(self.l_roll.get()),(self.password.get())])
+        m=c.execute(find_user,[(self.l_roll.get()),str(hashlib.sha256(self.password.get().encode('utf-8')).hexdigest())])
         
         result = c.fetchall()
         
@@ -75,7 +76,7 @@ class abc():
             self.log()
         #Create New Account 
         insert = 'INSERT INTO project1_registration(Name,password,Roll_No,Whatsapp_No) VALUES(?,?,?,?)'
-        c.execute(insert,[(self.n_username.get()),(self.n_password.get()),(self.roll.get()),(self.whtsapp.get())])
+        c.execute(insert,[(self.n_username.get()),str(hashlib.sha256(self.n_password.get().encode('utf-8')).hexdigest()),(self.roll.get()),(self.whtsapp.get())])
         db.commit()
 
         #Frame Packing Methords

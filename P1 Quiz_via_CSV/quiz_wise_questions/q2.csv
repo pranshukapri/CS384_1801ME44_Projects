@@ -1,0 +1,11 @@
+﻿ques_no,question,option1,option2,option3,option4,correct_option,marks_correct_ans,marks_wrong_ans,compulsory,time=20m
+1,"What is a correct syntax to output ""Hello World"" in Python?","p(""Hello World"")","print(""Hello World"")","echo ""Hello World""","echo(""Hello World"");",2,,,,
+2,How do you insert COMMENTS in Python code?,/*This is a comment*/,//This is a comment,#This is a comment,(This is a comment),3,,,,
+3,What is the maximum possible length of an identifier?,31 characters,63 characters,79 characters,none of the mentioned,4,,,,
+4,Which of the following is an invalid variable?,my_string_1,1st_string,foo,_,2,,,,
+5,Which of the following is not a keyword?,eval,assert,nonlocal,pass,1,,,,
+6,Which of the following is an invalid statement?,"abc = 1,000,000",a b c = 1000 2000 3000,"a,b,c = 1000, 2000, 3000","a_b_c = 1,000,000",2,,,,
+7,What arithmetic operators cannot be used with strings?,+,*,-,All of the mentioned,3,,,,
+8,What is the output? print(0xA + 0xB + 0xC),0xA0xB0xC,Error,0x22,33,4,,,,
+9,What is the output? print('new' 'line'),Error,Output equivalent to print'new\nline',newline,new line,3,,,,
+10,Why are local variable names beginning with an underscore discouraged?,they are used to indicate a private variables of a class,they confuse the interpreter,they are used to indicate global variables,they slow down execution,1,,,,
