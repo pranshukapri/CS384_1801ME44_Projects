@@ -425,3 +425,60 @@ def end_quiz():
     Label(subm_window, text = wrong).grid(row = 4, column = 1)
     Label(subm_window, text = "Total Marks Obtained: ").grid(row = 5, sticky = W)
     Label(subm_window, text = total_marks).grid(row = 5, column = 1)
+
+def end_quiz_eventpress(event):
+    global stop_timer
+    global total_marks
+    global quiz_no
+    global User_Roll
+    m=ms.askyesno(title='Submit',message='Are you Sure?')
+    if m:
+        stop_timer = True
+    
+        evalute()
+        subm_window = Tk()
+    
+        total_quiz_ques = 0
+        ques_att = 0
+        corr = 0
+        wrong = 0
+    
+        with open("./individual_responses/" + quiz_no + "_" + User_Roll + ".csv", 'r') as indi:
+            reader = csv.DictReader(indi, delimiter=',')
+        
+            for row in reader:
+                total_quiz_ques += 1
+                if row["Legend"] == "Correct Choice":
+                    corr += 1
+                    ques_att += 1
+                if row["Legend"] == "Wrong Choice":
+                    wrong += 1
+                    ques_att += 1
+            total_quiz_ques = total_quiz_ques - 2
+    else:
+        return
+    
+    Label(subm_window, text = "Your Quiz has been Sucessfully Submitted!\n").grid(row = 0)
+    Label(subm_window, text = "Total Quiz Questions: ").grid(row = 1, sticky = W)
+    Label(subm_window, text = total_quiz_ques).grid(row = 1, column = 1)
+    Label(subm_window, text = "Total Quiz Questions Attempted: ").grid(row = 2, sticky = W)
+    Label(subm_window, text = ques_att).grid(row = 2, column = 1)
+    Label(subm_window, text = "Total Correct Questions: ").grid(row = 3, sticky = W)
+    Label(subm_window, text = corr).grid(row = 3, column = 1)
+    Label(subm_window, text = "Total Wrong Questions: ").grid(row = 4, sticky = W)
+    Label(subm_window, text = wrong).grid(row = 4, column = 1)
+    Label(subm_window, text = "Total Marks Obtained: ").grid(row = 5, sticky = W)
+    Label(subm_window, text = total_marks).grid(row = 5, column = 1)
+
+def unattempted_ques_eventpress(event):
+    unattemp_ques=0
+    for i in marked:
+        if(i==0):
+            unattemp_ques+=1
+
+    #print(unattemp_ques)
+    if(unattemp_ques==0):
+        ms.showinfo('Unattempted Question',"Voila ! It seems you have attempted all questions")
+    else:
+        ms.showinfo('Unattempted Question',"You still havn't attempted "+str(unattemp_ques)+" questions")
+
