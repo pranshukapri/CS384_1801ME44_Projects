@@ -116,7 +116,8 @@ def Stats():
 	modified_date=''
 	creation_filedate=''
 	countchar=len(t1.get('1.0','end-1c')) - t1.get('1.0','end-1c').count(" ")
-	countwords=t1.get('1.0','end-1c').count(" ")+1
+	countwords=t1.get('1.0','end-1c')
+	countwords = len(re.findall(r'\w+',countwords))
 	if(ovr_filename==''):
 		modified_date="File Hasnt been Saved"
 		creation_filedate="File hasn't been Saved"
@@ -141,8 +142,6 @@ def creation_date(path_to_file):
             # We're probably on Linux. No easy way to get creation dates here,
             # so we'll settle for when its content was last modified.
             return stat.st_mtime
-
-
 
 def far():
 	t2=Toplevel(root)
