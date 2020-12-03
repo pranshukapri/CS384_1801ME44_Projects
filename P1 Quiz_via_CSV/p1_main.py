@@ -482,3 +482,101 @@ def unattempted_ques_eventpress(event):
     else:
         ms.showinfo('Unattempted Question',"You still havn't attempted "+str(unattemp_ques)+" questions")
 
+def database_marks_sub():
+    with sqlite3.connect('project1_quiz_cs384.db') as db:
+        c = db.cursor()
+    find_user_already_sub = ('SELECT Roll_No FROM project1_marks WHERE Roll_No = ? AND quiz_num = ?')
+    c.execute(find_user_already_sub,[User_Roll,quiz_no])
+    if c.fetchall():
+        #ms.showerror('Error!','Roll No has already given the quiz.')
+        #print("Already Submitted once but now it is modified")
+        ft = ('DELETE FROM project1_marks WHERE Roll_No = ? AND quiz_num = ?')
+        c.execute(ft,[User_Roll,quiz_no])
+        db.commit()
+        insert = 'INSERT INTO project1_marks(Roll_No,quiz_num,total_marks) VALUES(?,?,?)'
+        c.execute(insert,[User_Roll,quiz_no,total_marks])
+        db.commit()
+        database_to_csv()
+        
+    else:
+        #print("FIRST TIME QUIZ SUBMISSION")
+        insert = 'INSERT INTO project1_marks(Roll_No,quiz_num,total_marks) VALUES(?,?,?)'
+        c.execute(insert,[User_Roll,quiz_no,total_marks])
+        db.commit()
+        database_to_csv()
+
+def database_to_csv():
+    with sqlite3.connect('project1_quiz_cs384.db') as db:
+        curs = db.cursor()
+    curs.execute("SELECT * FROM project1_marks")
+    res=curs.fetchall()
+    raw_quizes=[]
+    for i in res:
+        raw_quizes.append(i[1])
+    uniq_quizes_name=list(set(raw_quizes))
+    
+    #print(uniq_quizes_name)
+    for file_name in uniq_quizes_name:
+        rows=[]
+        final_fname = "./quiz_wise_responses/" + "scores_" + file_name + ".csv"
+        if(os.path.exists(final_fname)):
+            os.remove(final_fname)
+            with open(final_fname, 'w',newline='') as fily:
+                writer=csv.writer(fily)
+                newheader=['Roll No','Quiz No','Total Marks']
+                writer.writerow(newheader)
+                for p in res:
+                    if(p[1]==file_name):
+                        writer.writerow(list(p))
+        else:
+            with open(final_fname, 'w',newline='') as fily:
+                writer=csv.writer(fily)
+                newheader=['Roll No','Quiz No','Total Marks']
+                writer.writerow(newheader)
+                for p in res:
+                    if(p[1]==file_name):
+                        writer.writerow(list(p))
+
+def database_to_csv_eventpress(event):
+    with sqlite3.connect('project1_quiz_cs384.db') as db:
+        curs = db.cursor()
+    curs.execute("SELECT * FROM project1_marks")
+    res=curs.fetchall()
+    raw_quizes=[]
+    for i in res:
+        raw_quizes.append(i[1])
+    uniq_quizes_name=list(set(raw_quizes))
+    
+    #print(uniq_quizes_name)
+    for file_name in uniq_quizes_name:
+        rows=[]
+        trim_name=re.split(r'[q]',file_name)
+        final_fname="quiz"+str(trim_name[1])+'.csv'
+        if(os.path.exists(final_fname)):
+            os.remove(final_fname)
+            with open(final_fname, 'w',newline='') as fily:
+                writer=csv.writer(fily)
+                newheader=['Roll No','Quiz No','Total Marks']
+                writer.writerow(newheader)
+                for p in res:
+                    if(p[1]==file_name):
+                        writer.writerow(list(p))
+        else:
+            with open(final_fname, 'w',newline='') as fily:
+                writer=csv.writer(fily)
+                newheader=['Roll No','Quiz No','Total Marks']
+                writer.writerow(newheader)
+                for p in res:
+                    if(p[1]==file_name):
+                        writer.writerow(list(p))
+
+# Driver Code Starts Here...
+User_Name = ""
+User_Roll = ""
+quiz_no = ""
+ques_no = 0
+total_marks = 0
+marked = []
+unatt = 0
+stop_timer = False
+login_window()
