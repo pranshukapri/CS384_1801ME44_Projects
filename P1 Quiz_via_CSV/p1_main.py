@@ -119,3 +119,21 @@ class abc():
 
         Button(self.crf,text = 'Create Account',bd = 3 ,font = ('',15),padx=5,pady=5,command=self.new_user).grid()
         Button(self.crf,text = 'Go to Login',bd = 3 ,font = ('',15),padx=5,pady=5,command=self.log).grid(row=4,column=1)
+        
+# Countdowm Function for Timer...
+def countdown(t,Q): 
+    global stop_timer
+    while t: 
+        mins, secs = divmod(t, 60) 
+        timer = '{:02d}:{:02d}'.format(mins, secs)
+        Q.put(timer)
+        time.sleep(1) 
+        t -= 1
+        if stop_timer:
+            break
+    if t == 0:
+        end_quiz()
+
+# Function for initial Login/Signup...
+def login_window():
+    win=abc()
