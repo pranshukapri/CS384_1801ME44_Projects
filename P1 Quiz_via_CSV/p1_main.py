@@ -117,27 +117,30 @@ class abc():
         Label(self.crf,text = 'Whatsapp_No: ',font = ('',20),pady=5,padx=5).grid(sticky = W)
         Entry(self.crf,textvariable = self.whtsapp,bd = 5,font = ('',15)).grid(row=3,column=1)
 
-
         Button(self.crf,text = 'Create Account',bd = 3 ,font = ('',15),padx=5,pady=5,command=self.new_user).grid()
         Button(self.crf,text = 'Go to Login',bd = 3 ,font = ('',15),padx=5,pady=5,command=self.log).grid(row=4,column=1)
 
 # Countdowm Function for Timer...
 def countdown(t,Q): 
     global stop_timer
+    stop_timer = False
     while t: 
         mins, secs = divmod(t, 60) 
         timer = '{:02d}:{:02d}'.format(mins, secs)
-        Q.put(timer)
+        Q.append(timer)
         time.sleep(1) 
         t -= 1
         if stop_timer:
             break
     if t == 0:
-        end_quiz()
-
+        stop_timer = True
+        
+    #print("countdown")
+        
 # Function for initial Login/Signup...
 def login_window():
-    win=abc()
+    abc()
+    #print("login window")
     
 # Funtion for the quiz Selection Window...
 def quiz_select(master):
@@ -156,6 +159,7 @@ def quiz_select(master):
         i += 1
     Button(select, text = "OK", command = lambda : [select.destroy(), main_quiz(quiz_name.get())]).pack(pady = 20)
     select.mainloop()
+    #print("quiz select")
 
 # Main Function for the Realtime Quiz...   
 def main_quiz(quiz_name):
@@ -165,6 +169,7 @@ def main_quiz(quiz_name):
     global quiz_no
     global marked
     global unatt
+    global stop_timer
     quiz_no = quiz_name[:-4]
     
     quiz_window = Tk()
@@ -194,7 +199,7 @@ def main_quiz(quiz_name):
             marked.append(0)
             q_no.append(x+1)
         
-        Q = Queue()
+        Q = []
         max_time = re.search(r'=(\d+)', header[-1]).group(1)
         max_time = int(max_time) * 60
         t2 = threading.Thread(target=countdown, args=(max_time, Q))
@@ -204,7 +209,7 @@ def main_quiz(quiz_name):
         selected_option.set(0)
         next_ques(list_ques, topframe, mid2frame, selected_option)
         Button(midframe, text = "Save & Next", command = lambda : next_ques(list_ques, topframe, mid2frame, selected_option)).pack(pady = 10, padx = 5, side = LEFT)
-        Button(midframe, text = "Submit", command = lambda : end_quiz()).pack(pady = 10, padx = 5)
+        Button(midframe, text = "Submit", command = lambda : end_quiz(quiz_window)).pack(pady = 10, padx = 5)
         
         var = IntVar()
         var.set(max_time)
@@ -233,7 +238,9 @@ def main_quiz(quiz_name):
             writer.writeheader()
         
         while 1:
-            var.set(Q.get())
+            if len(Q) > 0:
+                var.set(Q[0])
+                Q.pop()
             unattempted.set(unatt)
             try:
                 quiz_window.update()
@@ -242,10 +249,9 @@ def main_quiz(quiz_name):
             if stop_timer:
                 break
         
-        try:
-            quiz_window.destroy()
-        except:
-            end_quiz()
+        end_quiz(quiz_window)
+    
+    #print("main quiz")
 
 # Function for the Save & Next Button Working...
 def next_ques(list_ques, topframe, mid2frame, selected_option):
@@ -288,6 +294,8 @@ def next_ques(list_ques, topframe, mid2frame, selected_option):
         if not i:
             unatt += 1
     ques_no += 1
+    
+    #print("next ques")
 
 # Function for Goto Option (Called after clicking "OK" button)...
 def goto_ques(list_ques, topframe, mid2frame, choice, selected_option):
@@ -318,6 +326,8 @@ def goto_ques(list_ques, topframe, mid2frame, choice, selected_option):
     Label(mid2frame, text = "").grid(row = 3)
     
     ques_no += 1
+    
+    #print("goto ques")
 
 # Function for Evaluating the final parameters and putting into the csv file...
 def evalute():
@@ -378,42 +388,49 @@ def evalute():
         dict_temp["Total"] = total_quiz_marks
         dict_temp["Legend"] = "Total Quiz Marks"
         writer.writerow(dict_temp)
+        
+    #print("evaluate")
     
 # Final Function for ending the quiz and the Final Result Window...
-def end_quiz():
+def end_quiz(quiz_window):
     global stop_timer
     global total_marks
     global quiz_no
     global User_Roll
-    m=ms.askyesno(title='Submit',message='Are you Sure?')
-    if m:
-        stop_timer = True
+    global subm_called
     
-        evalute()
-        subm_window = Tk()
-    
-        total_quiz_ques = 0
-        ques_att = 0
-        corr = 0
-        wrong = 0
-    
-        with open("./individual_responses/" + quiz_no + "_" + User_Roll + ".csv", 'r') as indi:
-            reader = csv.DictReader(indi, delimiter=',')
-        
-            for row in reader:
-                total_quiz_ques += 1
-                if row["Legend"] == "Correct Choice":
-                    corr += 1
-                    ques_att += 1
-                if row["Legend"] == "Wrong Choice":
-                    wrong += 1
-                    ques_att += 1
-            total_quiz_ques = total_quiz_ques - 2
-            
-        database_marks_sub()
-        
+    if subm_called:
+        return True
     else:
-        return
+        subm_called += 1
+    
+    stop_timer = True
+    try:
+        quiz_window.destroy()
+    except:
+        pass
+    evalute()
+    subm_window = Tk()
+    
+    total_quiz_ques = 0
+    ques_att = 0
+    corr = 0
+    wrong = 0
+    
+    with open("./individual_responses/" + quiz_no + "_" + User_Roll + ".csv", 'r') as indi:
+        reader = csv.DictReader(indi, delimiter=',')
+        
+        for row in reader:
+            total_quiz_ques += 1
+            if row["Legend"] == "Correct Choice":
+                corr += 1
+                ques_att += 1
+            if row["Legend"] == "Wrong Choice":
+                wrong += 1
+                ques_att += 1
+        total_quiz_ques = total_quiz_ques - 2
+            
+    database_marks_sub()
     
     Label(subm_window, text = "Your Quiz has been Sucessfully Submitted!\n").grid(row = 0)
     Label(subm_window, text = "Total Quiz Questions: ").grid(row = 1, sticky = W)
@@ -426,38 +443,39 @@ def end_quiz():
     Label(subm_window, text = wrong).grid(row = 4, column = 1)
     Label(subm_window, text = "Total Marks Obtained: ").grid(row = 5, sticky = W)
     Label(subm_window, text = total_marks).grid(row = 5, column = 1)
+    
+    subm_window.mainloop()
+    
+    #print("end quiz")
 
 def end_quiz_eventpress(event):
     global stop_timer
     global total_marks
     global quiz_no
     global User_Roll
-    m=ms.askyesno(title='Submit',message='Are you Sure?')
-    if m:
-        stop_timer = True
     
-        evalute()
-        subm_window = Tk()
+    stop_timer = True
     
-        total_quiz_ques = 0
-        ques_att = 0
-        corr = 0
-        wrong = 0
+    evalute()
+    subm_window = Tk()
     
-        with open("./individual_responses/" + quiz_no + "_" + User_Roll + ".csv", 'r') as indi:
-            reader = csv.DictReader(indi, delimiter=',')
+    total_quiz_ques = 0
+    ques_att = 0
+    corr = 0
+    wrong = 0
+    
+    with open("./individual_responses/" + quiz_no + "_" + User_Roll + ".csv", 'r') as indi:
+        reader = csv.DictReader(indi, delimiter=',')
         
-            for row in reader:
-                total_quiz_ques += 1
-                if row["Legend"] == "Correct Choice":
-                    corr += 1
-                    ques_att += 1
-                if row["Legend"] == "Wrong Choice":
-                    wrong += 1
-                    ques_att += 1
-            total_quiz_ques = total_quiz_ques - 2
-    else:
-        return
+        for row in reader:
+            total_quiz_ques += 1
+            if row["Legend"] == "Correct Choice":
+                corr += 1
+                ques_att += 1
+            if row["Legend"] == "Wrong Choice":
+                wrong += 1
+                ques_att += 1
+        total_quiz_ques = total_quiz_ques - 2
     
     Label(subm_window, text = "Your Quiz has been Sucessfully Submitted!\n").grid(row = 0)
     Label(subm_window, text = "Total Quiz Questions: ").grid(row = 1, sticky = W)
@@ -470,6 +488,8 @@ def end_quiz_eventpress(event):
     Label(subm_window, text = wrong).grid(row = 4, column = 1)
     Label(subm_window, text = "Total Marks Obtained: ").grid(row = 5, sticky = W)
     Label(subm_window, text = total_marks).grid(row = 5, column = 1)
+    
+    subm_window.mainloop()
 
 def unattempted_ques_eventpress(event):
     unattemp_ques=0
@@ -505,6 +525,8 @@ def database_marks_sub():
         c.execute(insert,[User_Roll,quiz_no,total_marks])
         db.commit()
         database_to_csv()
+    
+    #print("database marks sub")
 
 def database_to_csv():
     with sqlite3.connect('project1_quiz_cs384.db') as db:
@@ -518,7 +540,6 @@ def database_to_csv():
     
     #print(uniq_quizes_name)
     for file_name in uniq_quizes_name:
-        rows=[]
         final_fname = "./quiz_wise_responses/" + "scores_" + file_name + ".csv"
         if(os.path.exists(final_fname)):
             os.remove(final_fname)
@@ -537,6 +558,8 @@ def database_to_csv():
                 for p in res:
                     if(p[1]==file_name):
                         writer.writerow(list(p))
+                        
+    #print("database to csv")
 
 def database_to_csv_eventpress(event):
     with sqlite3.connect('project1_quiz_cs384.db') as db:
@@ -550,7 +573,6 @@ def database_to_csv_eventpress(event):
     
     #print(uniq_quizes_name)
     for file_name in uniq_quizes_name:
-        rows=[]
         trim_name=re.split(r'[q]',file_name)
         final_fname="quiz"+str(trim_name[1])+'.csv'
         if(os.path.exists(final_fname)):
@@ -580,4 +602,5 @@ total_marks = 0
 marked = []
 unatt = 0
 stop_timer = False
+subm_called = 0
 login_window()
