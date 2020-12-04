@@ -14,6 +14,7 @@ undoList=[]
 redoList=[]
 ovr_filename=''
 
+
 #---------------------------------------------------FUNCTIONS--------------------------------------------------------------
 # open file
 def file():
@@ -97,6 +98,15 @@ def undo():
 	t1.insert(END,u)
 	print(redoList)
 # ---------------------------------------------------------------------	
+def cut():
+	t1.event_generate("<<Cut>>")
+
+def paste():
+	t1.event_generate("<<Paste>>")
+
+def copy():
+	t1.event_generate("<<Copy>>")
+
 # redo button
 def redo():
 	t1.delete('1.0',END)
@@ -158,8 +168,21 @@ def far():
 		count=len(s1.group())
 		v3.set(str(count)+' matches')
 
+	# def rep():
+	# 	reg1=re.compile(v1.get())
+	# 	s1=reg1.search(t1.get('1.0','end-1c'))
+	# 	print(s1)
+	#	pass	
 	def rep():
-		pass	
+		# findtext = str(t1.get('1.0', 'end-1c'))
+		# replacetext = str(v1.get())
+		# alltext = str(t1.get(1.0, END))
+		# alltext1 = all.replace(findtext, replacetext)
+		reg1=re.compile(v1.get())
+		article = re.sub(reg1, v2.get(),str(t1.get('1.0', 'end-1c')))
+		#t1.delete(1.0, END)
+		t1.delete('1.0','end-1c')
+		t1.insert('1.0', article)
 
 	l1=Label(t2,text='Find:').grid(row=0,column=0,sticky=W)
 	l2=Label(t2,text='Replace:').grid(row=1,column=0)
@@ -170,7 +193,7 @@ def far():
 	b1=Button(t2,text='Find',command=find).grid(row=2,column=0,sticky=E)
 	b2=Button(t2,text='Replace',command=rep).grid(row=2,column=1)
 
-# _______________________________________________________________________________________________________________________________
+
 # -----------------------Text Widget--------------------------------------
 t1=Text(root,font='Consolas 25')
 t1.bind('<Key>',press)
@@ -191,10 +214,9 @@ menubar.add_cascade(label='File',menu=fm)
 em=Menu(menubar,tearoff=0)
 em.add_command(label='Undo',command=undo)
 em.add_command(label='Redo',command=redo)
-em.add_command(label='Cut')
-em.add_command(label='Copy')
-em.add_command(label='Paste')
-em.add_command(label='Delete')
+em.add_command(label='Cut',command=cut)
+em.add_command(label='Copy',command=copy)
+em.add_command(label='Paste',command=paste)
 em.add_command(label='Find & Replace',command=far)
 menubar.add_cascade(label='Edit',menu=em)
 
